@@ -3,13 +3,9 @@ import { loginSchema } from './auth.schema';
 
 export const validateLoginInput = (req: Request, res: Response, next: NextFunction): any => {
   try {
-    loginSchema.parse({
-      body: req.body,
-    });
-    
-    next(); 
+    loginSchema.parse(req.body); // الفحص المباشر بدون كائن body إضافي
+    next();
   } catch (error: any) {
-    //  400 Bad Request
     return res.status(400).json({
       success: false,
       errors: error.errors ? error.errors.map((e: any) => e.message) : 'Invalid input',
