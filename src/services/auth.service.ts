@@ -1,34 +1,39 @@
-import jwt from 'jsonwebtoken';
-import { UserRepository } from '../repositories/user.repository';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access-secret-key';
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key';
+const prisma = new PrismaClient();
 
 export class AuthService {
+  // دالة تسجيل الدخول الحالية
   static async authenticateUser(userName: string, password: string) {
-    // 1. استخدام الـ Repository بدلاً من الفحص اليدوي
-    const user = await UserRepository.findByUserName(userName);
-
-    // فحص احتياطي للـ Mock Admin إذا لم تكن قاعدة البيانات متصلة بعد
-    const isValidUser = user 
-      ? (user.password === password) 
-      : (userName === 'admin' && password === '123456');
-
-    if (!isValidUser) {
+    const user = await prisma.user.findUnique({ where: { userName } });
+    if (!user) {
       return { success: false, message: 'Invalid userName or password' };
     }
 
-    // 2. توليد Access Token و Refresh Token
-    const payload = { userName };
-    const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-    const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return { success: false, message: 'Invalid userName or password' };
+    }
 
-    return {
-      success: true,
+    return { success: true, data: { id: user.id, userName: user.userName } };
+  }
+
+  // دالة إنشاء مستخدم جديد (Register)
+  static async registerUser(userName: string, password: string) {
+    const existingUser = await prisma.user.findUnique({ where: { userName } });
+    if (existingUser) {
+      return { success: false, message: 'Username is already taken' };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await prisma.user.create({
       data: {
-        accessToken,
-        refreshToken,
+        userName,
+        password: hashedPassword,
       },
-    };
+    });
+
+    return { success: true, data: { id: newUser.id, userName: newUser.userName } };
   }
 }

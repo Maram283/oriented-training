@@ -1,10 +1,14 @@
 import { Router } from 'express';
-import { login } from '../controllers/auth.controller';
-import { validateLoginInput } from '../middlewares/auth.middleware';
+import { login, register } from '../controllers/auth.controller';
+import { validateInput } from '../middlewares/auth.middleware';
+import { loginSchema, registerSchema } from '../middlewares/auth.schema';
 
 const router = Router();
 
-// نضع الـ Middleware قبل الـ Controller مباشرة
-router.post('/login', validateLoginInput, login);
+// مسار التسجيل الجديد
+router.post('/register', validateInput(registerSchema), register);
+
+// مسار تسجيل الدخول
+router.post('/login', validateInput(loginSchema), login);
 
 export default router;
