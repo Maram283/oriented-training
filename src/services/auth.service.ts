@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { UserResponseDto } from '../dtos/user.dto';
 
 const prisma = new PrismaClient();
 
 export class AuthService {
-  // دالة تسجيل الدخول الحالية
-  static async authenticateUser(userName: string, password: string) {
+  static async authenticateUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto }> {
     const user = await prisma.user.findUnique({ where: { userName } });
     if (!user) {
       return { success: false, message: 'Invalid userName or password' };
@@ -16,11 +16,17 @@ export class AuthService {
       return { success: false, message: 'Invalid userName or password' };
     }
 
-    return { success: true, data: { id: user.id, userName: user.userName } };
+    return { 
+      success: true, 
+      data: { 
+        id: user.id, 
+        userName: user.userName, 
+        createdAt: user.createdAt 
+      } 
+    };
   }
 
-  // دالة إنشاء مستخدم جديد (Register)
-  static async registerUser(userName: string, password: string) {
+  static async registerUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto }> {
     const existingUser = await prisma.user.findUnique({ where: { userName } });
     if (existingUser) {
       return { success: false, message: 'Username is already taken' };
@@ -34,6 +40,13 @@ export class AuthService {
       },
     });
 
-    return { success: true, data: { id: newUser.id, userName: newUser.userName } };
+    return { 
+      success: true, 
+      data: { 
+        id: newUser.id, 
+        userName: newUser.userName, 
+        createdAt: newUser.createdAt 
+      } 
+    };
   }
 }
