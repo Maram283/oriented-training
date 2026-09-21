@@ -2,11 +2,12 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserResponseDto } from '../dtos/user.dto';
+import { AuthMapper } from '../mappers/auth.mapper';
 
 const prisma = new PrismaClient();
 
 export class AuthService {
-  static async authenticateUser(userName: string, password: string): Promise<{ id: number; userName: string; createdAt: Date; token: string } | { success: boolean; message: string }> {
+  static async authenticateUser(userName: string, password: string): Promise<any> {
     const user = await prisma.user.findUnique({ where: { userName } });
     if (!user) {
       return { success: false, message: 'Invalid userName or password' };
@@ -23,12 +24,9 @@ export class AuthService {
       { expiresIn: '1d' }
     );
 
-    return {
-      id: user.id,
-      userName: user.userName,
-      createdAt: user.createdAt,
-      token
-    };
+    const expiredDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    return AuthMapper.toLoginResponseDto(user, token, expiredDate);
   }
 
   static async registerUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto }> {
