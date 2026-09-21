@@ -6,7 +6,7 @@ import { UserResponseDto } from '../dtos/user.dto';
 const prisma = new PrismaClient();
 
 export class AuthService {
-  static async authenticateUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto & { token?: string } }> {
+  static async authenticateUser(userName: string, password: string): Promise<{ id: number; userName: string; createdAt: Date; token: string } | { success: boolean; message: string }> {
     const user = await prisma.user.findUnique({ where: { userName } });
     if (!user) {
       return { success: false, message: 'Invalid userName or password' };
@@ -24,14 +24,10 @@ export class AuthService {
     );
 
     return {
-      success: true,
-      message: 'Login successful',
-      data: {
-        id: user.id,
-        userName: user.userName,
-        createdAt: user.createdAt,
-        token
-      }
+      id: user.id,
+      userName: user.userName,
+      createdAt: user.createdAt,
+      token
     };
   }
 

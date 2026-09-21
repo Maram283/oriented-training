@@ -6,18 +6,14 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
   const result = await AuthService.authenticateUser(userName, password);
 
-  if (!result.success) {
+  if ('success' in result && result.success === false) {
     return res.status(401).json({
       success: false,
       message: result.message,
     });
   }
 
-  return res.status(200).json({
-    success: true,
-    message: 'Login successful',
-    data: result.data,
-  });
+  return res.status(200).json(result);
 };
 
 export const register = async (req: Request, res: Response): Promise<any> => {
