@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { UserResponseDto } from '../dtos/user.dto';
 
 const prisma = new PrismaClient();
 
 export class AuthService {
-  static async authenticateUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto }> {
+  static async authenticateUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto & { token?: string } }> {
     const user = await prisma.user.findUnique({ where: { userName } });
     if (!user) {
       return { success: false, message: 'Invalid userName or password' };
@@ -16,13 +17,21 @@ export class AuthService {
       return { success: false, message: 'Invalid userName or password' };
     }
 
-    return { 
-      success: true, 
-      data: { 
-        id: user.id, 
-        userName: user.userName, 
-        createdAt: user.createdAt 
-      } 
+    const token = jwt.sign(
+      { userId: user.id, userName: user.userName },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '1d' }
+    );
+
+    return {
+      success: true,
+      message: 'Login successful',
+      data: {
+        id: user.id,
+        userName: user.userName,
+        createdAt: user.createdAt,
+        token
+      }
     };
   }
 
@@ -40,13 +49,14 @@ export class AuthService {
       },
     });
 
-    return { 
-      success: true, 
-      data: { 
-        id: newUser.id, 
-        userName: newUser.userName, 
-        createdAt: newUser.createdAt 
-      } 
+    return {
+      success: true,
+      message: 'User registered successfully',
+      data: {
+        id: newUser.id,
+        userName: newUser.userName,
+        createdAt: newUser.createdAt,
+      }
     };
   }
 }
