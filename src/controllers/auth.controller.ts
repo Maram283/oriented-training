@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
+import { AuthMapper } from '../mappers/auth.mapper';
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { userName, password } = req.body;
@@ -13,7 +14,10 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     });
   }
 
-  return res.status(200).json(result);
+  // هنا Controller استخدم الـ Mapper لبناء الـ ResponseDTO وإرساله للعميل
+  const responseDto = AuthMapper.toLoginResponseDto(result.user, result.token, result.expiredDate);
+
+  return res.status(200).json(responseDto);
 };
 
 export const register = async (req: Request, res: Response): Promise<any> => {

@@ -8,4 +8,13 @@ export class UserRepository {
       where: { userName },
     });
   }
+
+  static async createUser(userName: string, password: string) {
+    return await prisma.user.create({
+      data: {
+        userName,
+        password,
+      },
+    });
+  }
 }

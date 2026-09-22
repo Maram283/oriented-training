@@ -1,14 +1,11 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { UserRepository } from '../repositories/user.repository';
 import { UserResponseDto } from '../dtos/user.dto';
-import { AuthMapper } from '../mappers/auth.mapper';
-
-const prisma = new PrismaClient();
 
 export class AuthService {
   static async authenticateUser(userName: string, password: string): Promise<any> {
-    const user = await prisma.user.findUnique({ where: { userName } });
+    const user = await UserRepository.findByUserName(userName);
     if (!user) {
       return { success: false, message: 'Invalid userName or password' };
     }
@@ -26,22 +23,21 @@ export class AuthService {
 
     const expiredDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    return AuthMapper.toLoginResponseDto(user, token, expiredDate);
+    return {
+      user,
+      token,
+      expiredDate
+    };
   }
 
   static async registerUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto }> {
-    const existingUser = await prisma.user.findUnique({ where: { userName } });
+    const existingUser = await UserRepository.findByUserName(userName);
     if (existingUser) {
       return { success: false, message: 'Username is already taken' };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await prisma.user.create({
-      data: {
-        userName,
-        password: hashedPassword,
-      },
-    });
+    const newUser = await UserRepository.createUser(userName, hashedPassword);
 
     return {
       success: true,
