@@ -23,10 +23,11 @@ export class UserRepository {
 
   static async findAllUsers(): Promise<UserModel[]> {
     const users = await prisma.user.findMany();
-    return users.map((user) => UserModel.fromPrisma(user));
+    return users.map((user) => UserModel.fromPrisma(user) as UserModel);
   }
 
-  static async findUserById(id: number): Promise<UserModel | null> {
+  // الدالة التي كانت ناقصة وتسببت بالخطأ، أضفناها هنا لضمان عمل getById بكفاءة
+  static async findById(id: number): Promise<UserModel | null> {
     const user = await prisma.user.findUnique({
       where: { id },
     });

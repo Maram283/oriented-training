@@ -3,6 +3,7 @@ export class UserModel {
     public id: number,
     public userName: string,
     public password: string,
+    public role: string, 
     public createdAt: Date
   ) {}
 
@@ -14,6 +15,7 @@ export class UserModel {
       prismaUser.id,
       prismaUser.userName,
       prismaUser.password,
+      prismaUser.role, 
       prismaUser.createdAt
     );
   }

@@ -16,8 +16,13 @@ export class AuthService {
       return { success: false, message: 'Invalid userName or password' };
     }
 
+    // تضمين الـ role في الـ JWT Payload بكل احترافية
     const token = jwt.sign(
-      { userId: user.id, userName: user.userName },
+      {
+        userId: user.id,
+        userName: user.userName,
+        role: user.role,
+      },
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '1d' }
     );
@@ -56,6 +61,6 @@ export class AuthService {
   }
 
   static async getUserById(id: number): Promise<UserModel | null> {
-    return await UserRepository.findUserById(id);
+    return await UserRepository.findById(id);
   }
 }
