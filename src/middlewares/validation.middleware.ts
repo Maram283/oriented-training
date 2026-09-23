@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodSchema } from 'zod';
 
 export const validateInput = (schema: ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction): any => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {
-      schema.parse(req.body);
-      next();
+      req.body = schema.parse(req.body);
+      return next();
     } catch (error: any) {
       return res.status(400).json({
         success: false,

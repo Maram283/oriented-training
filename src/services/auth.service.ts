@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
 import { UserResponseDto } from '../dtos/user.dto';
+import { UserModel } from '../models/user.model';
 
 export class AuthService {
   static async authenticateUser(userName: string, password: string): Promise<any> {
@@ -26,7 +27,7 @@ export class AuthService {
     return {
       user,
       token,
-      expiredDate
+      expiredDate,
     };
   }
 
@@ -46,7 +47,15 @@ export class AuthService {
         id: newUser.id,
         userName: newUser.userName,
         createdAt: newUser.createdAt,
-      }
+      },
     };
+  }
+
+  static async getAllUsers(): Promise<UserModel[]> {
+    return await UserRepository.findAllUsers();
+  }
+
+  static async getUserById(id: number): Promise<UserModel | null> {
+    return await UserRepository.findUserById(id);
   }
 }

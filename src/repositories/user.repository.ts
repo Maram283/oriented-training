@@ -20,4 +20,16 @@ export class UserRepository {
     });
     return UserModel.fromPrisma(user);
   }
+
+  static async findAllUsers(): Promise<UserModel[]> {
+    const users = await prisma.user.findMany();
+    return users.map((user) => UserModel.fromPrisma(user));
+  }
+
+  static async findUserById(id: number): Promise<UserModel | null> {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    return UserModel.fromPrisma(user);
+  }
 }

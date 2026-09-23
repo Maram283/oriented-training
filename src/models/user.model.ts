@@ -6,8 +6,10 @@ export class UserModel {
     public createdAt: Date
   ) {}
 
-  // دالة لتحويل كائن بريزما إلى كلاس الـ Model الخاص بنا
-  static fromPrisma(prismaUser: any): UserModel {
+  static fromPrisma(prismaUser: any): UserModel | null {
+    if (!prismaUser) {
+      return null;
+    }
     return new UserModel(
       prismaUser.id,
       prismaUser.userName,
