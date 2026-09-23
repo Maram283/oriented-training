@@ -16,7 +16,6 @@ export class AuthService {
       return { success: false, message: 'Invalid userName or password' };
     }
 
-    // تضمين الـ role في الـ JWT Payload بكل احترافية
     const token = jwt.sign(
       {
         userId: user.id,

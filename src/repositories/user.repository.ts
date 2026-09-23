@@ -26,7 +26,6 @@ export class UserRepository {
     return users.map((user) => UserModel.fromPrisma(user) as UserModel);
   }
 
-  // الدالة التي كانت ناقصة وتسببت بالخطأ، أضفناها هنا لضمان عمل getById بكفاءة
   static async findById(id: number): Promise<UserModel | null> {
     const user = await prisma.user.findUnique({
       where: { id },
