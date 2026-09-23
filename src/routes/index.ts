@@ -4,8 +4,10 @@ import { getAllUsers, getUserById } from '../controllers/user.controller';
 import { validateInput } from '../middlewares/validation.middleware';
 import { loginSchema, registerSchema } from '../validations/auth.schema';
 import { verifyToken, authorize } from '../middlewares/auth.middleware';
+import taskRoutes from './task.routes';
 
 const router = Router();
+router.use('/tasks', taskRoutes);
 
 if (register && validateInput && registerSchema) {
   router.post('/register', validateInput(registerSchema), register);
