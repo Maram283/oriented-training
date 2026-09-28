@@ -1,33 +1,34 @@
 import { Request, Response } from 'express';
+import { BaseController } from './base.controller';
 import { AuthService } from '../services/auth.service';
-import { AuthMapper } from '../mappers/auth.mapper';
+import { HTTP_STATUS } from '../utils/status-codes';
+import { catchAsync } from '../utils/catchAsync';
+import { AppError } from '../utils/AppError';
 import { LoginRequestDto, RegisterRequestDto } from '../dtos/user.dto';
 
-export const login = async (req: Request, res: Response): Promise<any> => {
-  const dto: LoginRequestDto = req.body;
-  const result = await AuthService.authenticateUser(dto.userName, dto.password);
+class AuthController extends BaseController {
+  public register = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const dto = new RegisterRequestDto(req.body);
+    const result = await AuthService.registerUser(dto.userName, dto.password);
 
-  if ('success' in result && result.success === false) {
-    return res.status(401).json({
-      success: false,
-      message: result.message,
-    });
-  }
+    if (!result.success) {
+      throw new AppError(result.message, HTTP_STATUS.BAD_REQUEST);
+    }
 
-  const responseDto = AuthMapper.toLoginResponseDto(result.user, result.token, result.expiredDate);
-  return res.status(200).json(responseDto);
-};
+    this.sendResponse(res, HTTP_STATUS.CREATED, result.data, result.message);
+  });
 
-export const register = async (req: Request, res: Response): Promise<any> => {
-  const dto: RegisterRequestDto = req.body;
-  const result = await AuthService.registerUser(dto.userName, dto.password);
+  public login = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const dto = new LoginRequestDto(req.body);
+    const result = await AuthService.authenticateUser(dto.userName, dto.password);
 
-  if (!result.success) {
-    return res.status(400).json({
-      success: false,
-      message: result.message,
-    });
-  }
+    if (!result.success) {
+      throw new AppError(result.message, HTTP_STATUS.UNAUTHORIZED);
+    }
 
-  return res.status(201).json(result.data);
-};
+    const { user, token, expiredDate } = result;
+    this.sendResponse(res, HTTP_STATUS.OK, { user, token, expiredDate }, 'Login successful');
+  });
+}
+
+export const authController = new AuthController();

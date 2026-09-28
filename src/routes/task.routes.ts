@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import { TaskController } from '../controllers/task.controller';
+import { taskController } from '../controllers/task.controller';
 import { verifyToken } from '../middlewares/auth.middleware';
+import { validate } from '../middlewares/validation.middleware';
+import { createTaskSchema } from '../validations/task.schema';
+
 const router = Router();
 
-router.post('/', verifyToken, TaskController.createTask);
-router.get('/', verifyToken, TaskController.getAllTasks);
-router.get('/my-tasks', verifyToken, TaskController.getUserTasks);
+router.post('/', validate(createTaskSchema), taskController.createTask);
+router.get('/my-tasks', taskController.getUserTasks);
 
 export default router;

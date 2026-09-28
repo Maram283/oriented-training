@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
 import { UserResponseDto } from '../dtos/user.dto';
-import { UserModel } from '../models/user.model';
 
 export class AuthService {
   static async authenticateUser(userName: string, password: string): Promise<any> {
@@ -28,14 +27,17 @@ export class AuthService {
 
     const expiredDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    const { password: _, ...userWithoutPassword } = user;
+
     return {
-      user,
+      success: true,
+      user: userWithoutPassword,
       token,
       expiredDate,
     };
   }
 
-  static async registerUser(userName: string, password: string): Promise<{ success: boolean; message?: string; data?: UserResponseDto }> {
+  static async registerUser(userName: string, password: string): Promise<{ success: boolean; message: string; data?: UserResponseDto }> {
     const existingUser = await UserRepository.findByUserName(userName);
     if (existingUser) {
       return { success: false, message: 'Username is already taken' };
@@ -55,11 +57,15 @@ export class AuthService {
     };
   }
 
-  static async getAllUsers(): Promise<UserModel[]> {
-    return await UserRepository.findAllUsers();
+  static async getAllUsers() {
+    const users = await UserRepository.findAllUsers();
+    return users.map(({ password: _, ...user }) => user);
   }
 
-  static async getUserById(id: number): Promise<UserModel | null> {
-    return await UserRepository.findById(id);
+  static async getUserById(id: number) {
+    const user = await UserRepository.findById(id);
+    if (!user) return null;
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
