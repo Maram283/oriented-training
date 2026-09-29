@@ -4,10 +4,47 @@ import { taskController } from '../controllers/task.controller';
 
 const router = Router();
 
-// /api/admin/users
+/**
+ * @swagger
+ * tags:
+ *   name: Admin
+ *   description: Administrator restricted endpoints
+ */
+
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: Get all users (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Not an admin)
+ */
 router.get('/users', userController.getAllUsers);
 
-// /api/admin/tasks
+/**
+ * @swagger
+ * /api/admin/tasks:
+ *   get:
+ *     summary: Get all tasks (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all tasks
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Not an admin)
+ */
 router.get('/tasks', taskController.getAllTasks);
 
 export default router;

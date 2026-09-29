@@ -2,11 +2,10 @@ import { Response } from 'express';
 
 export class BaseController {
   protected sendResponse<T>(res: Response, statusCode: number, data: T, message?: string) {
-    return res.status(statusCode).json({
-      success: true,
-      message: message || 'Operation successful',
-      data,
-    });
+    if (data) {
+      return res.status(statusCode).json(data);
+    }
+    return res.status(statusCode).json({ message: message || 'Operation successful' });
   }
 
   protected sendError(res: Response, statusCode: number, error: string) {
