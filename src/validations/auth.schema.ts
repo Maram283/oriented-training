@@ -13,3 +13,16 @@ export const registerSchema = z.object({
     password: z.string().min(6, 'password must be at least 6 characters'),
   }),
 });
+
+export const verify2FALoginSchema = z.object({
+  body: z.object({
+    tempToken: z.string().min(1, 'tempToken is required'),
+    code: z.string().length(6, 'Code must be exactly 6 digits'),
+  }),
+});
+
+export const verify2FASetupSchema = z.object({
+  body: z.object({
+    code: z.string().length(6, 'Code must be exactly 6 digits'),
+  }),
+});

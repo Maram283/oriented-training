@@ -8,14 +8,16 @@ generator client {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  userName   String   @unique @map("user_name")
-  password   String
-  role       String   @default("user")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updated_at DateTime @updatedAt @map("updated_at")
+  id                 Int      @id @default(autoincrement())
+  userName           String   @unique @map("user_name")
+  password           String
+  role               String   @default("user")
+  isTwoFactorEnabled Boolean  @default(false) @map("is_two_factor_enabled")
+  twoFactorSecret    String?  @map("two_factor_secret")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updated_at         DateTime @updatedAt @map("updated_at")
   
-  tasks      Task[]   
+  tasks              Task[]   
 
   @@map("users")
 }

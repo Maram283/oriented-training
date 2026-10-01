@@ -56,8 +56,63 @@ registry.registerPath({
     },
   },
   responses: {
-    200: { description: 'Login successful - returns token' },
+    200: { description: 'Login successful - returns token OR requires2FA flag with tempToken' },
     401: { description: 'Invalid credentials' },
+  },
+});
+
+registry.registerPath({
+  method: 'post',
+  path: '/api/auth/login/verify-2fa',
+  tags: ['Auth'],
+  summary: 'Verify 2FA code during login',
+  security: [],
+  request: {
+    body: {
+      required: true,
+      content: { 'application/json': { schema: z.object({
+        tempToken: z.string().openapi({ example: 'eyJhbGciOiJIUzI1Ni...' }),
+        code: z.string().length(6).openapi({ example: '123456' }),
+      }) } },
+    },
+  },
+  responses: {
+    200: { description: '2FA verification successful - returns real token' },
+    400: { description: 'Validation failed' },
+    401: { description: 'Invalid 2FA code' },
+  },
+});
+
+registry.registerPath({
+  method: 'post',
+  path: '/api/auth/2fa/generate',
+  tags: ['Auth'],
+  summary: 'Generate 2FA secret and QR Code for logged-in user',
+  security: [{ [bearerAuth.name]: [] }],
+  responses: {
+    200: { description: 'QR Code generated successfully' },
+    401: { description: 'Unauthorized' },
+  },
+});
+
+registry.registerPath({
+  method: 'post',
+  path: '/api/auth/2fa/verify',
+  tags: ['Auth'],
+  summary: 'Verify 2FA setup and enable it for the user',
+  security: [{ [bearerAuth.name]: [] }],
+  request: {
+    body: {
+      required: true,
+      content: { 'application/json': { schema: z.object({
+        code: z.string().length(6).openapi({ example: '123456' }),
+      }) } },
+    },
+  },
+  responses: {
+    200: { description: '2FA enabled successfully' },
+    400: { description: 'Invalid code' },
+    401: { description: 'Unauthorized' },
   },
 });
 
